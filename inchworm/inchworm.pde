@@ -7,10 +7,11 @@ void drawWorm(float inched) {
   fill(0);
   stroke(255);
   beginShape();
-  vertex(50, 150); // first point
   float inchedY = 150-100*inched;
-  bezierVertex(100, 150, 100, inchedY, 150, inchedY);
-  bezierVertex(200, inchedY, 200, 150, 250, 150);
+  float dInchedX = 50*inched;
+  vertex(50+dInchedX, 150); // first point
+  bezierVertex(100+dInchedX/2.0, 150, 100+dInchedX/2.0, inchedY, 150, inchedY);
+  bezierVertex(200-dInchedX/2.0, inchedY, 200-dInchedX/2.0, 150, 250-dInchedX, 150);
   endShape();
 }
 
@@ -27,7 +28,7 @@ void draw() {
   else if (inching <= 0.0) {
     di = 0.01;
   }
-  println(di);
-  println(inching);
+  // println(di);
+  // println(inching);
   inching += di;
 }
