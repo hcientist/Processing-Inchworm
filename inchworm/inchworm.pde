@@ -34,19 +34,19 @@ class Inchworm {
     l = 200;
     bearing = 0;
     inched = 0;
-    inchHeight = 75;
+    inchHeight = 100;
     x = 50;
     y = 150;
     c = color(255);
   }
 
   void draw() {
-    float inchedY = y-inchHeight*inched;
+    float inchedY = y-inchHeight*inched;  //distance from baseline of worm "up" 
+                                          // to current hump peak
     float dInchedX = inchHeight/2*inched;
     strokeWeight(w);
     fill(0);
     stroke(c);
-    // stroke(255);
     beginShape();
     vertex(x+dInchedX, y); // first point
     bezierVertex(x+l/4.0+dInchedX/2.0, y, x+l/4.0+dInchedX/2.0, inchedY, x+l/2.0, inchedY);
@@ -60,7 +60,7 @@ class Inchworm {
       di = 0.01;
     }
     inched += di;
-    x += 50*abs(di);
+    x += 50*abs(di); //figure out what's special about 50 here
   }
 };
 
