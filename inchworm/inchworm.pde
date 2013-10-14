@@ -1,77 +1,220 @@
-float inching = 0.0;
+import java.util.Map;
+
 float di = 0.01;
-float initX = 50.0;
+
+int MAX_W = 640;
+int MAX_H = 360;
 
 ArrayList<Inchworm> worms = new ArrayList<Inchworm>();
 
-void drawWorm(float inched, float initialX) {
-  // println(inched);
-  float inchedY = 150-100*inched;
-  float dInchedX = 50*inched;
-  strokeWeight(30);
-  fill(0);
-  stroke(255);
-  translate(initialX, 0);
-  beginShape();
-  vertex(50+dInchedX, 150); // first point
-  bezierVertex(100+dInchedX/2.0, 150, 100+dInchedX/2.0, inchedY, 150, inchedY);
-  bezierVertex(200-dInchedX/2.0, inchedY, 200-dInchedX/2.0, 150, 250-dInchedX, 150);
-  endShape();
-}
+class Position {
+  float x;
+  float y;
+
+  Position () {
+    // x = 0;
+    // y = 0;
+  }
+
+  Position (float xPos, float yPos) {
+    x = xPos;
+    y = yPos;
+  }
+  
+};
 
 class Inchworm {
   float w;          // width of worm
   float l;          // length of worm
-  float inchHeight; // diff in "height" of flat and "inched" worm
+  float inchHeight; // max diff in "height" of flat and "inched" worm
   float inched;     // 0.0 - 1.0: how "inched" is the worm (0=not inched, 1=fully inched)
   float bearing;    // current bearing
-  float x;          // current x position of worm
-  float y;          // current y position of worm
+  float x;          // current x position of worm tail
+  float y;          // current y position of worm tail
+  float x0;         // original x position of worm
+  float y0;         // original y position of worm
   color c;          // color of this worm
+  float humpBearing = 0;
+  float alt = sqrt(sq(l/2.0)+sq(inchiness()));
+
+
+  HashMap<String, Position> splinePoints = new HashMap<String,Position>();
+
 
   Inchworm() {
-    w = 30;
+    w = 90;
     l = 200;
     bearing = 0;
     inched = 0;
     inchHeight = 100;
+    humpBearing = degrees(atan(inchHeight/(l/2.0)));
     x = 50;
-    y = 150;
+    y = 200;
+    x0 = x;
+    y0 = y;
     c = color(255);
+    splinePoints.put("tail", new Position(x,y));
+    splinePoints.put("tailControl", new Position(x+l/4.0, y));
+    splinePoints.put("humpTailControl", new Position(x+l/4.0, y));
+    splinePoints.put("hump", new Position(x+l/2.0, y));
+    splinePoints.put("humpHeadControl", new Position(x+3*l/4.0, y));
+    splinePoints.put("headControl", new Position(x+3*l/4.0, y));
+    splinePoints.put("head", new Position(x+l, y));
+
   }
 
-  void draw() {
-    float inchedY = y-inchHeight*inched;  //distance from baseline of worm "up" 
-                                          // to current hump peak
-    float dInchedX = inchHeight/2*inched;
-    strokeWeight(w);
-    fill(0);
-    stroke(c);
-    beginShape();
-    vertex(x+dInchedX, y); // first point
-    bezierVertex(x+l/4.0+dInchedX/2.0, y, x+l/4.0+dInchedX/2.0, inchedY, x+l/2.0, inchedY);
-    bezierVertex(x+3*l/4.0-dInchedX/2.0, inchedY, x+3*l/4.0-dInchedX/2.0, y, x+l-dInchedX, y);
-    endShape();
+  float inchiness() {
+    return inched*inchHeight;
+  }
 
+  Position tailPos() {
+    return new Position(x,y);
+  }
+
+  Position tailCtrlPos() {
+    Position t = tailPos();
+    float tcPosX = t.x+l/4.0*cos(radians(bearing));
+    float tcPosY = t.y+l/4.0*sin(radians(bearing));
+    return new Position(tcPosX, tcPosY);
+  }
+
+  //this depends on alt getting updated at each step before this is run.
+  Position humpPos() {
+    Position t = tailPos();
+    println(t.x + " " + t.y);
+
+    println(alt);
+
+    float thetaT = bearing-humpBearing;
+    println(thetaT);
+    float thetaTRadians = radians(thetaT);
+    println(thetaTRadians);
+
+    println(cos(thetaTRadians));
+
+    println(sin(thetaTRadians));
+
+    float humpX = t.x+alt*cos(thetaTRadians);
+    float humpY = t.y+alt*sin(thetaTRadians);
+    return new Position(humpX, humpY);    
+  }
+
+  Position humpTailCtrlPos() {
+    Position p = humpPos();
+    float htcX = p.x-l/4.0*cos(radians(bearing));
+    float htcY = p.y-l/4.0*sin(radians(bearing));
+    return new Position(htcX, htcY);
+  }
+
+  Position humpHeadCtrlPos() {
+    Position p = humpPos();
+    float hhcX = p.x+l/4.0*cos(radians(bearing));
+    float hhcY = p.y+l/4.0*sin(radians(bearing));
+    return new Position(hhcX, hhcY);
+  }
+
+  Position headPos() {
+    Position t = tailPos();
+    float hpX = t.x + l*cos(radians(bearing));
+    float hpY = t.y + l*sin(radians(bearing));
+    return new Position(hpX, hpY);
+  }
+
+  Position headCtrlPos() {
+    Position head = headPos();
+    float hcX = head.x - l/4.0*cos(radians(bearing));
+    float hcY = head.y - l/4.0*sin(radians(bearing));
+    return new Position(hcX, hcY);
+  }
+
+  void step() {
+    // float newNormalInchDisplacement = inchHeight * inched;  //distance from baseline of worm "up" 
+    //                                                         // to current hump peak
+
+    // float normalInchDisplacement = y - (inchHeight * inched); //distance from baseline of worm "up" 
+    //                                                           // to current hump peak
+
+    // float longitudinalInchDisplacement = inchHeight/2.0*inched;
+
+    alt = sqrt(sq(l/2.0)+sq(inchiness()));
+    // println(alt);
+    
+    // splinePoints.put("tail", new Position(x+longitudinalInchDisplacement,y));
+    // splinePoints.put("tailControl", new Position(x+(l/4.0+longitudinalInchDisplacement/2.0), y));
+    // splinePoints.put("humpTailControl", new Position(x+(l/4.0+longitudinalInchDisplacement/2.0), y-newNormalInchDisplacement));
+    // splinePoints.put("hump", new Position(x+(l/2.0), y-newNormalInchDisplacement));
+    // splinePoints.put("humpHeadControl", new Position(x+(3*l/4.0-longitudinalInchDisplacement/2.0), y-newNormalInchDisplacement));
+    // splinePoints.put("headControl", new Position(x+(3*l/4.0-longitudinalInchDisplacement/2.0), y));
+    // splinePoints.put("head", new Position(x+(l-longitudinalInchDisplacement), y));
+
+    splinePoints.put("tail", tailPos());
+    splinePoints.put("tailControl", tailCtrlPos());
+    splinePoints.put("humpTailControl", humpTailCtrlPos());
+    splinePoints.put("hump", humpPos());
+    splinePoints.put("humpHeadControl", humpHeadCtrlPos());
+    splinePoints.put("headControl", headCtrlPos());
+    splinePoints.put("head", headPos());
+
+    draw();
+
+    // make the worm hump oscillate
     if (inched >= 1.0) {
       di = -0.01;
     }
     else if (inched <= 0.0) {
       di = 0.01;
     }
+
+    //if the worm goes off screen, make it start coming back
+
+    if (x - w > MAX_W) {
+      x = 0-(l+w);
+    }
+
     inched += di;
-    x += 50*abs(di); //figure out what's special about 50 here
+    x += 50*abs(di)*cos(radians(bearing)); //figure out what's special about 50 here
+    y += 50*abs(di)*sin(radians(bearing)); //figure out what's special about 50 here
+  }
+
+  void draw() {
+    
+    strokeWeight(w);
+    fill(0);
+    stroke(c);
+
+    println(splinePoints.get("tail").x + " " + splinePoints.get("tail").y);
+    println(splinePoints.get("hump").x + " " + splinePoints.get("hump").y);
+
+    beginShape();
+    vertex(splinePoints.get("tail").x, splinePoints.get("tail").y); // first point
+    bezierVertex(splinePoints.get("tailControl").x, splinePoints.get("tailControl").y, splinePoints.get("humpTailControl").x, splinePoints.get("humpTailControl").y, splinePoints.get("hump").x, splinePoints.get("hump").y);
+    bezierVertex(splinePoints.get("humpHeadControl").x, splinePoints.get("humpHeadControl").y, splinePoints.get("headControl").x, splinePoints.get("headControl").y, splinePoints.get("head").x, splinePoints.get("head").y);
+    endShape();
   }
 };
 
 void setup () {
-	size(640, 360);
+	size(MAX_W, MAX_H);
   worms.add(new Inchworm());
 }
 
 void draw() {
   background(0);
   for (int i=0; i<worms.size(); i++) {
-    worms.get(i).draw();
+    worms.get(i).step();
   }
 }
+
+//  eventually start back on other side, sort of like:
+ // if (xpos > width) {
+ //     xpos = 0;
+ //   }
+ //   if (ypos > height) {
+ //     ypos = 0;
+ //   }
+ //   if (xpos < 0) {
+ //     xpos = width;
+ //   }
+ //   if (ypos < 0) {
+ //     ypos = height;
+ //   }
