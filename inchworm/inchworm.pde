@@ -1,77 +1,155 @@
-float inching = 0.0;
-float di = 0.01;
-float initX = 50.0;
+import java.util.Map;
+
+// float di = 0.01;
+int MIN_W = 0;
+int MIN_H = 0;
+int MAX_W = 1200;
+int MAX_H = 800;
 
 ArrayList<Inchworm> worms = new ArrayList<Inchworm>();
 
-void drawWorm(float inched, float initialX) {
-  // println(inched);
-  float inchedY = 150-100*inched;
-  float dInchedX = 50*inched;
-  strokeWeight(30);
-  fill(0);
-  stroke(255);
-  translate(initialX, 0);
-  beginShape();
-  vertex(50+dInchedX, 150); // first point
-  bezierVertex(100+dInchedX/2.0, 150, 100+dInchedX/2.0, inchedY, 150, inchedY);
-  bezierVertex(200-dInchedX/2.0, inchedY, 200-dInchedX/2.0, 150, 250-dInchedX, 150);
-  endShape();
-}
+class Position {
+  float x;
+  float y;
+
+  Position () {}
+
+  Position (float xPos, float yPos) {
+    x = xPos;
+    y = yPos;
+  }
+  
+};
+
+// float randomRange(min, max) {
+//   return Math.random() * (MAX_INCHY_RATIO - MIN_INCHY_RATIO) + MIN_INCHY_RATIO
+// }
 
 class Inchworm {
   float w;          // width of worm
   float l;          // length of worm
-  float inchHeight; // diff in "height" of flat and "inched" worm
+  float inchHeight; // max diff in "height" of flat and "inched" worm
   float inched;     // 0.0 - 1.0: how "inched" is the worm (0=not inched, 1=fully inched)
   float bearing;    // current bearing
-  float x;          // current x position of worm
-  float y;          // current y position of worm
+  float x;          // current x position of worm tail
+  float y;          // current y position of worm tail
   color c;          // color of this worm
+  float speed;
+  float di;
 
-  Inchworm() {
-    w = 30;
-    l = 200;
-    bearing = 0;
-    inched = 0;
-    inchHeight = 100;
-    x = 50;
-    y = 150;
-    c = color(255);
+  float MAX_WORM_WIDTH = 100;
+  float MIN_WORM_WIDTH = 10;
+  float MAX_L_RATIO = 3.0;
+  float MIN_L_RATIO = 1.0;
+  float MAX_INCHY_RATIO = 3.0/4.0;
+  float MIN_INCHY_RATIO = 1.0/4.0;
+
+  void setup() {
+    x = random(MAX_W);
+    y = random(MAX_H);
+
+    bearing = random(TAU);
+    c = color(random(255), random(255), random(255));
+
+    w = random(MIN_WORM_WIDTH, MAX_WORM_WIDTH);
+    l = w * random(MIN_L_RATIO, MAX_L_RATIO);
+
+    inched = random(1.0);
+    inchHeight = l * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
+
+    speed = random(0.005, 0.2);
+    di = speed;
   }
 
-  void draw() {
-    float inchedY = y-inchHeight*inched;  //distance from baseline of worm "up" 
-                                          // to current hump peak
-    float dInchedX = inchHeight/2*inched;
+  Inchworm(float x, float y, color c, float b) {
+    setup();
+
+    this.x = x;
+    this.y = y;
+    this.bearing = b;
+    this.c = c;
+  }
+
+  Inchworm() {
+    setup();
+  }
+
+  float inchiness() {
+    return inched*inchHeight;
+  }
+
+  void step() {
+
     strokeWeight(w);
-    fill(0);
+    // fill(255);
     stroke(c);
+    float theta = atan(inchiness()/(l/2.0));
+    float hypot = sqrt(sq(inchiness())+sq(l/2.0));
+    float xh = hypot * cos(bearing-theta) + x; // note to self, think about degrees/radians and processing's origin
+    float yh = hypot * sin(bearing-theta) + y; // note to self, think about degrees/radians and processing's origin
+    float xhtc = xh - l/4.0 * cos(bearing);
+    float yhtc = yh - l/4.0 * sin(bearing);
+    float xhhc = xh + l/4.0 * cos(bearing);
+    float yhhc = yh + l/4.0 * sin(bearing);
+    float xtc = x + l/4.0 * cos(bearing);
+    float ytc = y + l/4.0 * sin(bearing);
+    float xhc = x + 3.0*l/4.0 * cos(bearing);
+    float yhc = y + 3.0*l/4.0 * sin(bearing);
+    float xhead = x + l * cos(bearing);
+    float yhead = y + l * sin(bearing);
+
     beginShape();
-    vertex(x+dInchedX, y); // first point
-    bezierVertex(x+l/4.0+dInchedX/2.0, y, x+l/4.0+dInchedX/2.0, inchedY, x+l/2.0, inchedY);
-    bezierVertex(x+3*l/4.0-dInchedX/2.0, inchedY, x+3*l/4.0-dInchedX/2.0, y, x+l-dInchedX, y);
+    vertex(x, y);
+    bezierVertex(xtc, ytc, xhtc, yhtc, xh, yh);
+    bezierVertex(xhhc, yhhc, xhc, yhc, xhead, yhead);
     endShape();
 
+    // make the worm hump oscillate
     if (inched >= 1.0) {
-      di = -0.01;
+      di = -speed;
     }
     else if (inched <= 0.0) {
-      di = 0.01;
+      di = speed;
     }
+
+    l = l - di*inchHeight;
+
     inched += di;
-    x += 50*abs(di); //figure out what's special about 50 here
+    
+    if (di >=0 ){ // when di > 0, we're moving the tail.
+      x += di*inchHeight*cos(bearing);
+      y += di*inchHeight*sin(bearing);
+
+      float modBearing = (bearing % TAU);
+
+      if (x + w < MIN_W && !(modBearing > -HALF_PI && modBearing < HALF_PI)) { // off screen to left
+        x = MAX_W + (l + w);
+      } else if (x - w > MAX_W && modBearing > -HALF_PI && modBearing < HALF_PI) { // off screen to right
+        x = 0 - (l + w);
+      }
+
+      if (y + w < MIN_H && !(modBearing > 0 && modBearing < PI)) { // off screen to top
+        y = MAX_H + (l + w);
+      } else if (y - w > MAX_H && modBearing > 0 && modBearing < PI) { // off screen to bottom
+        y = 0 - (l + w);
+      }
+    }
   }
 };
 
 void setup () {
-	size(640, 360);
-  worms.add(new Inchworm());
+	size(MAX_W, MAX_H);
+
+  int wormCount = (int)random(5, 100);
+  println("wormCount: " + wormCount);
+  for (int i = 0; i < wormCount; i++) {
+    worms.add(new Inchworm());
+  }
 }
 
 void draw() {
-  background(0);
+  background(255);
   for (int i=0; i<worms.size(); i++) {
-    worms.get(i).draw();
+    worms.get(i).step();
   }
 }
