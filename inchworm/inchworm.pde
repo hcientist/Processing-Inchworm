@@ -53,11 +53,11 @@ class Inchworm {
   Inchworm() {
     w = 90;
     l = 200;
-    bearing = 3.14/4.0;
+    bearing = -HALF_PI+1.4;
     inched = 0;
     inchHeight = 100;
     humpBearing = degrees(atan(inchHeight/(l/2.0)));
-    x = 50;
+    x = 150;
     y = 200;
     x0 = x;
     y0 = y;
@@ -102,59 +102,53 @@ class Inchworm {
       di = 0.1;
     }
 
-    //if the worm goes off screen, make it start coming back
-
-    if (x - w > MAX_W) {
-      x = 0-(l+w);
-    } else if (x+w < MIN_W) {
-      x = MAX_W+l+2*w;
-    } else if (y+w < MIN_H) {
-      y = MAX_H+l+2*w;
-    } else if (y-w > MAX_H) {
-      y = 0-(l+w);
-    } 
-
     l = l - di*inchHeight;
 
     inched += di;
-    if (di >=0 ){
-      x += di*inchHeight*cos(bearing); //figure out what's special about 50 here
-      y += di*inchHeight*sin(bearing); //figure out what's special about 50 here
+    
+    if (di >=0 ){ // when di > 0, we're moving the tail.
+      x += di*inchHeight*cos(bearing);
+      y += di*inchHeight*sin(bearing);
+
+      float modBearing = (bearing % TAU);
+
+      if (x + w < MIN_W && !(modBearing > -HALF_PI && modBearing < HALF_PI)) { // off screen to left
+        println("< MIN_W "+x);
+        x = MAX_W + (l + w);
+      } else if (x - w > MAX_W && modBearing > -HALF_PI && modBearing < HALF_PI) { // off screen to right
+        println("> MAX_W "+x);
+        x = 0 - (l + w);
+      }
+
+      if (y + w < MIN_H && !(modBearing > 0 && modBearing < PI)) { // off screen to top
+        println("< MIN_H "+y);
+        y = MAX_H + (l + w);
+      } else if (y - w > MAX_H && modBearing > 0 && modBearing < PI) { // off screen to bottom
+        println("> MAX_H "+y);
+        y = 0 - (l + w);
+      }
     }
   }
 
   void draw() {
-    
     strokeWeight(w);
-    fill(0);
+    fill(255);
     stroke(c);
   }
 };
 
 void setup () {
 	size(MAX_W, MAX_H);
-  worms.add(new Inchworm());
-  worms.add(new Inchworm(200, 50, color(150), -0.25));
-  worms.add(new Inchworm(175, 100, color(50), 3.14+0.25));
+  // worms.add(new Inchworm());
+  worms.add(new Inchworm(200, 50, color(150, 0, 0), -0.25));
+  worms.add(new Inchworm(175, 100, color(0, 225, 100), 3.14+0.25));
+  worms.add(new Inchworm(15, 100, color(0, 200, 50), 2.14+0.25));
+  worms.add(new Inchworm(55, 200, color(200, 100, 10), 0.45));
 }
 
 void draw() {
-  background(0);
+  background(255);
   for (int i=0; i<worms.size(); i++) {
     worms.get(i).step();
   }
 }
-
-//  eventually start back on other side, sort of like:
- // if (xpos > width) {
- //     xpos = 0;
- //   }
- //   if (ypos > height) {
- //     ypos = 0;
- //   }
- //   if (xpos < 0) {
- //     xpos = width;
- //   }
- //   if (ypos < 0) {
- //     ypos = height;
- //   }
