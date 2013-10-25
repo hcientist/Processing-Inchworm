@@ -1,7 +1,8 @@
 import java.util.Map;
 
 float di = 0.01;
-
+int MIN_W = 0;
+int MIN_H = 0;
 int MAX_W = 640;
 int MAX_H = 360;
 
@@ -11,10 +12,7 @@ class Position {
   float x;
   float y;
 
-  Position () {
-    // x = 0;
-    // y = 0;
-  }
+  Position () {}
 
   Position (float xPos, float yPos) {
     x = xPos;
@@ -37,16 +35,19 @@ class Inchworm {
   float humpBearing = 0;
   float alt = sqrt(sq(l/2.0)+sq(inchiness()));
 
-
-  HashMap<String, Position> splinePoints = new HashMap<String,Position>();
-
   Inchworm(float x, float y, color c, float b) {
-    Inchworm i = new Inchworm();
-    i.x = x;
-    i.y = y;
-    i.c = c;
-    i.bearing = b;
-    // this = i;
+    w = 90;
+    l = 200;
+    bearing = b;
+    inched = 0;
+    inchHeight = 100;
+    humpBearing = degrees(atan(inchHeight/(l/2.0)));
+    this.x = x;
+    this.y = y;
+    y = 200;
+    x0 = x;
+    y0 = y;
+    this.c = c;
   }
 
   Inchworm() {
@@ -61,79 +62,11 @@ class Inchworm {
     x0 = x;
     y0 = y;
     c = color(255);
-    // splinePoints.put("tail", new Position(x,y));
-    // splinePoints.put("tailControl", new Position(x+l/4.0, y));
-    // splinePoints.put("humpTailControl", new Position(x+l/4.0, y));
-    // splinePoints.put("hump", new Position(x+l/2.0, y));
-    // splinePoints.put("humpHeadControl", new Position(x+3*l/4.0, y));
-    // splinePoints.put("headControl", new Position(x+3*l/4.0, y));
-    // splinePoints.put("head", new Position(x+l, y));
-
   }
 
   float inchiness() {
     return inched*inchHeight;
   }
-
-  // Position tailPos() {
-  //   return new Position(x,y);
-  // }
-
-  // Position tailCtrlPos() {
-  //   Position t = tailPos();
-  //   float tcPosX = t.x+l/4.0*cos(radians(bearing));
-  //   float tcPosY = t.y+l/4.0*sin(radians(bearing));
-  //   return new Position(tcPosX, tcPosY);
-  // }
-
-  //this depends on alt getting updated at each step before this is run.
-  // Position humpPos() {
-  //   Position t = tailPos();
-  //   println(t.x + " " + t.y);
-
-  //   println(alt);
-
-  //   float thetaT = bearing-humpBearing;
-  //   println(thetaT);
-  //   float thetaTRadians = radians(thetaT);
-  //   println(thetaTRadians);
-
-  //   println(cos(thetaTRadians));
-
-  //   println(sin(thetaTRadians));
-
-  //   float humpX = t.x+alt*cos(thetaTRadians);
-  //   float humpY = t.y+alt*sin(thetaTRadians);
-  //   return new Position(humpX, humpY);    
-  // }
-
-  // Position humpTailCtrlPos() {
-  //   Position p = humpPos();
-  //   float htcX = p.x-l/4.0*cos(radians(bearing));
-  //   float htcY = p.y-l/4.0*sin(radians(bearing));
-  //   return new Position(htcX, htcY);
-  // }
-
-  // Position humpHeadCtrlPos() {
-  //   Position p = humpPos();
-  //   float hhcX = p.x+l/4.0*cos(radians(bearing));
-  //   float hhcY = p.y+l/4.0*sin(radians(bearing));
-  //   return new Position(hhcX, hhcY);
-  // }
-
-  // Position headPos() {
-  //   Position t = tailPos();
-  //   float hpX = t.x + l*cos(radians(bearing));
-  //   float hpY = t.y + l*sin(radians(bearing));
-  //   return new Position(hpX, hpY);
-  // }
-
-  // Position headCtrlPos() {
-  //   Position head = headPos();
-  //   float hcX = head.x - l/4.0*cos(radians(bearing));
-  //   float hcY = head.y - l/4.0*sin(radians(bearing));
-  //   return new Position(hcX, hcY);
-  // }
 
   void step() {
 
@@ -161,37 +94,6 @@ class Inchworm {
     bezierVertex(xhhc, yhhc, xhc, yhc, xhead, yhead);
     endShape();
 
-
-    // humpBearing = degrees(atan(inchHeight/(l/2.0)));
-    // float newNormalInchDisplacement = inchHeight * inched;  //distance from baseline of worm "up" 
-    //                                                         // to current hump peak
-
-    // float normalInchDisplacement = y - (inchHeight * inched); //distance from baseline of worm "up" 
-    //                                                           // to current hump peak
-
-    // float longitudinalInchDisplacement = inchHeight/2.0*inched;
-
-    // alt = sqrt(sq(l/2.0)+sq(inchiness()));
-    // println(alt);
-    
-    // splinePoints.put("tail", new Position(x+longitudinalInchDisplacement,y));
-    // splinePoints.put("tailControl", new Position(x+(l/4.0+longitudinalInchDisplacement/2.0), y));
-    // splinePoints.put("humpTailControl", new Position(x+(l/4.0+longitudinalInchDisplacement/2.0), y-newNormalInchDisplacement));
-    // splinePoints.put("hump", new Position(x+(l/2.0), y-newNormalInchDisplacement));
-    // splinePoints.put("humpHeadControl", new Position(x+(3*l/4.0-longitudinalInchDisplacement/2.0), y-newNormalInchDisplacement));
-    // splinePoints.put("headControl", new Position(x+(3*l/4.0-longitudinalInchDisplacement/2.0), y));
-    // splinePoints.put("head", new Position(x+(l-longitudinalInchDisplacement), y));
-
-    // splinePoints.put("tail", tailPos());
-    // splinePoints.put("tailControl", tailCtrlPos());
-    // splinePoints.put("humpTailControl", humpTailCtrlPos());
-    // splinePoints.put("hump", humpPos());
-    // splinePoints.put("humpHeadControl", humpHeadCtrlPos());
-    // splinePoints.put("headControl", headCtrlPos());
-    // splinePoints.put("head", headPos());
-
-    // draw();
-
     // make the worm hump oscillate
     if (inched >= 1.0) {
       di = -0.1;
@@ -204,9 +106,13 @@ class Inchworm {
 
     if (x - w > MAX_W) {
       x = 0-(l+w);
+    } else if (x+w < MIN_W) {
+      x = MAX_W+l+2*w;
+    } else if (y+w < MIN_H) {
+      y = MAX_H+l+2*w;
     } else if (y-w > MAX_H) {
       y = 0-(l+w);
-    }
+    } 
 
     l = l - di*inchHeight;
 
@@ -222,16 +128,6 @@ class Inchworm {
     strokeWeight(w);
     fill(0);
     stroke(c);
-
-    // println(splinePoints.get("tail").x + " " + splinePoints.get("tail").y);
-    // println(splinePoints.get("hump").x + " " + splinePoints.get("hump").y);
-
-    // beginShape();
-    // vertex()
-    // vertex(splinePoints.get("tail").x, splinePoints.get("tail").y); // first point
-    // bezierVertex(splinePoints.get("tailControl").x, splinePoints.get("tailControl").y, splinePoints.get("humpTailControl").x, splinePoints.get("humpTailControl").y, splinePoints.get("hump").x, splinePoints.get("hump").y);
-    // bezierVertex(splinePoints.get("humpHeadControl").x, splinePoints.get("humpHeadControl").y, splinePoints.get("headControl").x, splinePoints.get("headControl").y, splinePoints.get("head").x, splinePoints.get("head").y);
-    // endShape();
   }
 };
 
