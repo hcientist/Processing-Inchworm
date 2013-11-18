@@ -137,19 +137,19 @@ class Inchworm {
   }
 };
 
-void setup () {
-	size(MAX_W, MAX_H);
+// void setup () {
+// 	size(MAX_W, MAX_H);
 
-  int wormCount = (int)random(5, 100);
-  println("wormCount: " + wormCount);
-  for (int i = 0; i < wormCount; i++) {
-    worms.add(new Inchworm());
-  }
-}
+//   int wormCount = (int)random(5, 100);
+//   println("wormCount: " + wormCount);
+//   for (int i = 0; i < wormCount; i++) {
+//     worms.add(new Inchworm());
+//   }
+// }
 
-void draw() {
-  background(255);
-  for (int i=0; i<worms.size(); i++) {
-    worms.get(i).step();
-  }
-}
+// void draw() {
+//   background(255);
+//   for (int i=0; i<worms.size(); i++) {
+//     worms.get(i).step();
+//   }
+// }
