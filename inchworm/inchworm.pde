@@ -19,6 +19,10 @@ class Position {
     y = yPos;
   }
   
+  String toString(){
+    return "("+this.x+", "+this.y+")";
+  }
+
 };
 
 // float randomRange(min, max) {
@@ -46,16 +50,16 @@ class Inchworm {
   void setup() {
     this.tail = new Position(random(MAX_W), random(MAX_H));
 
-    bearing = random(TAU);
+    bearing = 0;//random(TAU);
     wormColor = color(random(255), random(255), random(255));
 
-    wormWidth = random(MIN_WORM_WIDTH, MAX_WORM_WIDTH);
-    wormLength = wormWidth * random(MIN_L_RATIO, MAX_L_RATIO);
+    wormWidth = 75;//random(MIN_WORM_WIDTH, MAX_WORM_WIDTH);
+    wormLength = wormWidth*MAX_L_RATIO;//wormWidth * random(MIN_L_RATIO, MAX_L_RATIO);
 
     inched = random(1.0);
     inchHeight = wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
 
-    speed = random(0.005, 0.2);
+    speed = 0.009;//random(0.005, 0.2);
     di = speed;
   }
 
@@ -75,15 +79,12 @@ class Inchworm {
   }
 
   Position translatePosition(Position p0, float bearing) { //pass in width?
-    return new Position(p0.x+wormWidth*3*cos(bearing), p0.y+wormWidth*3*sin(bearing));
+    return new Position(p0.x+wormWidth*cos(bearing), p0.y+wormWidth*sin(bearing));
   }
 
   void step() {
 
     // strokeWeight(wormWidth);
-    strokeWeight(5);
-    // fill(255);
-    stroke(wormColor);
     float theta = atan(inchiness()/(wormLength/2.0));
     float hypot = sqrt(sq(inchiness())+sq(wormLength/2.0));
     
@@ -95,15 +96,16 @@ class Inchworm {
     Position head = new Position(tail.x + wormLength * cos(bearing), tail.y + wormLength * sin(bearing));
 
     float bearingNormal = bearing - HALF_PI;
+    float bearingReverse = bearing + PI;
 
     Position tailControlShifted = intersect(translatePosition(tail, bearingNormal), 
                                             translatePosition(tailControl, bearingNormal),
-                                            translatePosition(tailControl, -bearing),
-                                            translatePosition(humpTailControl, -bearing)
+                                            translatePosition(tailControl, bearingReverse),
+                                            translatePosition(humpTailControl, bearingReverse)
                                             );
 
-    Position humpTailControlShifted = intersect(translatePosition(tailControl, -bearing),
-                                                translatePosition(humpTailControl, -bearing),
+    Position humpTailControlShifted = intersect(translatePosition(tailControl, bearingReverse),
+                                                translatePosition(humpTailControl, bearingReverse),
                                                 translatePosition(humpTailControl, bearingNormal),
                                                 translatePosition(hump, bearingNormal)
                                                 );
@@ -120,23 +122,66 @@ class Inchworm {
                                             translatePosition(head, bearingNormal)
                                             );
 
-    Position headShifted = translatePosition(head, bearingNormal);
-    Position tailShifted = translatePosition(tail, bearingNormal);
+    Position headShifted = translatePosition(translatePosition(head, bearingNormal), bearing);
+    Position tailShifted = translatePosition(translatePosition(tail, bearingNormal), bearingReverse);
     Position humpShifted = translatePosition(hump, bearingNormal);
+    // Position headShifted = head;
+    // Position tailShifted = tail;
+    // Position humpShifted = hump;
 
+    strokeWeight(5);
+    noFill();
+    stroke(wormColor);
     beginShape();
     vertex(tail.x, tail.y);
     bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
     bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
+    endShape(); // use endShape(CLOSE) in the future
 
+    beginShape();
     vertex(tailShifted.x, tailShifted.y);
     bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
     bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
     endShape();
 
+    // stroke(0, 0, 255);
+    // point(tailControlShifted.x, tailControlShifted.y);
+    // point(humpTailControlShifted.x, humpTailControlShifted.y);
+    // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
+    // point(headControlShifted.x, headControlShifted.y);
+
+    // stroke(255,0,0);
+    // point(tailShifted.x, tailShifted.y);
+    // point(humpShifted.x, humpShifted.y);
+    // point(headShifted.x, headShifted.y);
+
+    // strokeWeight(2);
+    // line(translatePosition(tail, bearingNormal).x, translatePosition(tail, bearingNormal).y, translatePosition(tailControl, bearingNormal).x, translatePosition(tailControl, bearingNormal).y);
+    // line(translatePosition(tailControl, -bearing).x, 
+    //   translatePosition(tailControl, -bearing).y,
+    //   translatePosition(humpTailControl, -bearing).x,
+    //   translatePosition(humpTailControl, -bearing).y);
+
     // make the worm hump oscillate
     if (inched >= 1.0) {
       di = -speed;
+
+      println("tail: "+tail);
+      println("tailControl: "+tailControl);
+      println("humpTailControl: "+humpTailControl);
+      println("hump: "+hump);
+      println("humpHeadControl: "+humpHeadControl);
+      println("headControl: "+headControl);
+      println("head: "+head);
+      println();
+      println("tailShifted: "+tailShifted);
+      println("tailControlShifted: "+tailControlShifted);
+      println("humpTailControlShifted: "+humpTailControlShifted);
+      println("humpShifted: "+humpShifted);
+      println("humpHeadControlShifted: "+humpHeadControlShifted);
+      println("headControlShifted: "+headControlShifted);
+      println("headShifted: "+headShifted);
+      println();
     }
     else if (inched <= 0.0) {
       di = speed;
@@ -264,7 +309,7 @@ class Inchworm {
 void setup () {
   size(MAX_W, MAX_H);
 
-  int wormCount = 2;//(int)random(5, 100);
+  int wormCount = 1;//(int)random(5, 100);
   println("wormCount: " + wormCount);
   for (int i = 0; i < wormCount; i++) {
     worms.add(new Inchworm());
