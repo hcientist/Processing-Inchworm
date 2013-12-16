@@ -36,6 +36,7 @@ class Inchworm {
   float inched;             // 0.0 - 1.0: how "inched" is the worm (0=not inched, 1=fully inched)
   float bearing;            // current bearing
   float bearingNormal;
+  float bearingNormalReverse;
   float bearingReverse;
   Position tail;
   color wormColor;          // color of this worm
@@ -63,19 +64,26 @@ class Inchworm {
   Position tailShifted;
   Position humpShifted;
 
+  Position frontFace;
+  Position bottomFace;
+
   void setup() {
     this.tail = new Position(random(MAX_W), random(MAX_H));
 
-    bearing = 0;//random(TAU);
+    bearing = random(TAU);
     wormColor = color(random(255), random(255), random(255));
+    this.bearingNormal = bearing - HALF_PI;
+    this.bearingReverse = bearing + PI;
+    this.bearingNormalReverse = bearing + HALF_PI;
+    this.wormColor = wormColor;
 
-    wormWidth = 75;//random(MIN_WORM_WIDTH, MAX_WORM_WIDTH);
-    wormLength = wormWidth*MAX_L_RATIO;//wormWidth * random(MIN_L_RATIO, MAX_L_RATIO);
+    wormWidth = random(MIN_WORM_WIDTH, MAX_WORM_WIDTH);
+    wormLength = wormWidth * random(MIN_L_RATIO, MAX_L_RATIO);
 
     inched = random(1.0);
-    inchHeight = wormLength * MAX_INCHY_RATIO;//wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
+    inchHeight = wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
 
-    speed = 0.009;//random(0.005, 0.2);
+    speed = random(0.005, 0.2); // consider making this a normal or other (non-random) distribution
     di = speed;
   }
 
@@ -84,6 +92,7 @@ class Inchworm {
     this.tail = new Position(x, y);
     this.bearing = b;
     this.bearingNormal = bearing - HALF_PI;
+    this.bearingNormalReverse = bearing + HALF_PI;
     this.bearingReverse = bearing + PI;
     this.wormColor = wormColor;
   }
@@ -121,7 +130,12 @@ class Inchworm {
   }
 
   void aestheticWormAdjustment(float humpBloat) {
+    // println(bearing);
+    // println(bearingNormal);
+    // println(humpTailControlShifted);
     humpTailControlShifted = translatePosition(humpTailControlShifted, bearingNormal, humpBloat);
+    // println(humpTailControlShifted);
+    // println();
     humpShifted = translatePosition(humpShifted, bearingNormal, humpBloat);
     humpHeadControlShifted = translatePosition(humpHeadControlShifted, bearingNormal, humpBloat);
     // humpTailControlShifted.y = humpTailControlShifted.y + humpBloat*sin(bearingNormal);
@@ -172,39 +186,43 @@ class Inchworm {
     headShifted = translatePosition(translatePosition(head, bearingNormal, wormWidth), bearing, wormWidth);
     tailShifted = translatePosition(translatePosition(tail, bearingNormal, wormWidth), bearingReverse, wormWidth);
     humpShifted = translatePosition(hump, bearingNormal, wormWidth);
+
+    frontFace = translatePosition(headShifted, bearing+HALF_PI/2.0, wormWidth/2.0);
+    bottomFace = translatePosition(head, bearing, wormWidth/2.0);
     // Position headShifted = head;
     // Position tailShifted = tail;
     // Position humpShifted = hump;
     
-    aestheticWormAdjustment(25.0*inched);
+    aestheticWormAdjustment(this.wormWidth/3.0*inched);
 
     strokeWeight(5);
     noFill();
     stroke(wormColor);
-    // beginShape();
-    // vertex(tail.x, tail.y);
-    // bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
-    // bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
+    beginShape();
+    vertex(tail.x, tail.y);
+    bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
+    bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
     // endShape(); // use endShape(CLOSE) in the future
 
-    // float humpBloat = 25.0 * inched;
+    // beginShape();
+    // vertex(tailShifted.x, tailShifted.y);
+    // bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
+    // bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
 
-    beginShape();
-    vertex(tailShifted.x, tailShifted.y);
-    bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
-    bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
+    bezierVertex(frontFace.x, frontFace.y, bottomFace.x, bottomFace.y, headShifted.x, headShifted.y);
+    bezierVertex(headControlShifted.x, headControlShifted.y, humpHeadControlShifted.x, humpHeadControlShifted.y, humpShifted.x, humpShifted.y);
+    bezierVertex(humpTailControlShifted.x, humpTailControlShifted.y, tailControlShifted.x, tailControlShifted.y, tailShifted.x, tailShifted.y);
 
+    endShape(CLOSE);
 
-    endShape();
-
-    // stroke(0, 0, 255);
-    // point(tailShifted.x, tailShifted.y);
-    // point(headShifted.x, headShifted.y);
+    stroke(0, 0, 255);
     // point(headControlShifted.x, headControlShifted.y);
     // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
     // point(humpTailControlShifted.x, humpTailControlShifted.y);
-    // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
-    // point(headControlShifted.x, headControlShifted.y);
+    // point(tailControlShifted.x, tailControlShifted.y);
+
+    point(frontFace.x, frontFace.y);
+    point(bottomFace.x, bottomFace.y);
 
     // stroke(255,0,0);
     // point(tailShifted.x, tailShifted.y);
@@ -349,7 +367,8 @@ class Inchworm {
 void setup () {
   size(MAX_W, MAX_H);
 
-  int wormCount = 2;//(int)random(5, 100);
+  // int wormCount = (int)random(5, 100);
+  int wormCount = 1;
   println("wormCount: " + wormCount);
   for (int i = 0; i < wormCount; i++) {
     worms.add(new Inchworm());
