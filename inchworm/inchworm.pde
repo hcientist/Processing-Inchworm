@@ -74,25 +74,25 @@ class Inchworm {
     setup();
   }
 
-  String toString() {
-    return "tail: "+tail + "\n" +
-      "tailControl: "+tailControl + "\n" +
-      "humpTailControl: "+humpTailControl + "\n" +
-      "hump: "+hump + "\n" +
-      "humpHeadControl: "+humpHeadControl + "\n" +
-      "headControl: "+headControl + "\n" +
-      "head: "+head + "\n" +
-      "\n" +
-      "tailShifted: "+tailShifted + "\n" +
-      "tailControlShifted: "+tailControlShifted + "\n" +
-      "humpTailControlShifted: "+humpTailControlShifted + "\n" +
-      "humpShifted: "+humpShifted + "\n" +
-      "humpHeadControlShifted: "+humpHeadControlShifted + "\n" +
-      "headControlShifted: "+headControlShifted + "\n" +
-      "headShifted: "+headShifted + "\n" +
-      "\n";
+  // String toString() {
+  //   return "tail: "+tail + "\n" +
+  //     "tailControl: "+tailControl + "\n" +
+  //     "humpTailControl: "+humpTailControl + "\n" +
+  //     "hump: "+hump + "\n" +
+  //     "humpHeadControl: "+humpHeadControl + "\n" +
+  //     "headControl: "+headControl + "\n" +
+  //     "head: "+head + "\n" +
+  //     "\n" +
+  //     "tailShifted: "+tailShifted + "\n" +
+  //     "tailControlShifted: "+tailControlShifted + "\n" +
+  //     "humpTailControlShifted: "+humpTailControlShifted + "\n" +
+  //     "humpShifted: "+humpShifted + "\n" +
+  //     "humpHeadControlShifted: "+humpHeadControlShifted + "\n" +
+  //     "headControlShifted: "+headControlShifted + "\n" +
+  //     "headShifted: "+headShifted + "\n" +
+  //     "\n";
 
-  }
+  // }
 
   float inchiness() {
     return inched*inchHeight;
