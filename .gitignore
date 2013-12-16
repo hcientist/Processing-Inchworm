@@ -1,3 +1,6 @@
 .DS_Store
 *.class
 *.java
+.floo*
+.sublime-project
+FLOOBITS_README.md
