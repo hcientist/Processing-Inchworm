@@ -35,6 +35,8 @@ class Inchworm {
   float inchHeight;         // max diff in "height" of flat and "inched" worm
   float inched;             // 0.0 - 1.0: how "inched" is the worm (0=not inched, 1=fully inched)
   float bearing;            // current bearing
+  float bearingNormal;
+  float bearingReverse;
   Position tail;
   color wormColor;          // color of this worm
   float speed;
@@ -46,6 +48,20 @@ class Inchworm {
   float MIN_L_RATIO = 1.0;
   float MAX_INCHY_RATIO = 3.0/4.0;
   float MIN_INCHY_RATIO = 1.0/4.0;
+
+  Position tailControl;
+  Position hump;
+  Position humpTailControl;
+  Position humpHeadControl;
+  Position headControl;
+  Position head;
+  Position tailControlShifted;
+  Position humpTailControlShifted;
+  Position humpHeadControlShifted;
+  Position headControlShifted;
+  Position headShifted;
+  Position tailShifted;
+  Position humpShifted;
 
   void setup() {
     this.tail = new Position(random(MAX_W), random(MAX_H));
@@ -67,6 +83,8 @@ class Inchworm {
     setup();
     this.tail = new Position(x, y);
     this.bearing = b;
+    this.bearingNormal = bearing - HALF_PI;
+    this.bearingReverse = bearing + PI;
     this.wormColor = wormColor;
   }
 
@@ -74,32 +92,44 @@ class Inchworm {
     setup();
   }
 
-  String toString() {
-    return "tail: "+tail + "\n" +
-      "tailControl: "+tailControl + "\n" +
-      "humpTailControl: "+humpTailControl + "\n" +
-      "hump: "+hump + "\n" +
-      "humpHeadControl: "+humpHeadControl + "\n" +
-      "headControl: "+headControl + "\n" +
-      "head: "+head + "\n" +
-      "\n" +
-      "tailShifted: "+tailShifted + "\n" +
-      "tailControlShifted: "+tailControlShifted + "\n" +
-      "humpTailControlShifted: "+humpTailControlShifted + "\n" +
-      "humpShifted: "+humpShifted + "\n" +
-      "humpHeadControlShifted: "+humpHeadControlShifted + "\n" +
-      "headControlShifted: "+headControlShifted + "\n" +
-      "headShifted: "+headShifted + "\n" +
-      "\n";
+  // String toString() {
+  //   return "tail: "+tail + "\n" +
+  //     "tailControl: "+tailControl + "\n" +
+  //     "humpTailControl: "+humpTailControl + "\n" +
+  //     "hump: "+hump + "\n" +
+  //     "humpHeadControl: "+humpHeadControl + "\n" +
+  //     "headControl: "+headControl + "\n" +
+  //     "head: "+head + "\n" +
+  //     "\n" +
+  //     "tailShifted: "+tailShifted + "\n" +
+  //     "tailControlShifted: "+tailControlShifted + "\n" +
+  //     "humpTailControlShifted: "+humpTailControlShifted + "\n" +
+  //     "humpShifted: "+humpShifted + "\n" +
+  //     "humpHeadControlShifted: "+humpHeadControlShifted + "\n" +
+  //     "headControlShifted: "+headControlShifted + "\n" +
+  //     "headShifted: "+headShifted + "\n" +
+  //     "\n";
 
-  }
+  // }
 
   float inchiness() {
     return inched*inchHeight;
   }
 
-  Position translatePosition(Position p0, float bearing) { //pass in width?
-    return new Position(p0.x+wormWidth*cos(bearing), p0.y+wormWidth*sin(bearing));
+  Position translatePosition(Position p0, float bearing, float w) { //pass in width?
+    return new Position(p0.x+w*cos(bearing), p0.y+w*sin(bearing));
+  }
+
+  void aestheticWormAdjustment(float humpBloat) {
+    humpTailControlShifted = translatePosition(humpTailControlShifted, bearingNormal, humpBloat);
+    humpShifted = translatePosition(humpShifted, bearingNormal, humpBloat);
+    humpHeadControlShifted = translatePosition(humpHeadControlShifted, bearingNormal, humpBloat);
+    // humpTailControlShifted.y = humpTailControlShifted.y + humpBloat*sin(bearingNormal);
+    // humpTailControlShifted.x = humpTailControlShifted.x + humpBloat*cos(bearingNormal);
+    // humpShifted.x = humpShifted.x + humpBloat*cos(bearingNormal);
+    // humpShifted.y = humpShifted.y + humpBloat*sin(bearingNormal);
+    // humpHeadControlShifted.x = humpHeadControlShifted.x + humpBloat*cos(bearingNormal);
+    // humpHeadControlShifted.y = humpHeadControlShifted.y + humpBloat*sin(bearingNormal);
   }
 
   void step() {
@@ -108,62 +138,63 @@ class Inchworm {
     float theta = atan(inchiness()/(wormLength/2.0));
     float hypot = sqrt(sq(inchiness())+sq(wormLength/2.0));
     
-    Position tailControl = new Position(tail.x + wormLength/4.0 * cos(bearing), tail.y + wormLength/4.0 * sin(bearing));
-    Position hump = new Position(hypot * cos(bearing-theta) + tail.x, hypot * sin(bearing-theta) + tail.y);
-    Position humpTailControl = new Position(hump.x - wormLength/4.0 * cos(bearing), hump.y - wormLength/4.0 * sin(bearing));
-    Position humpHeadControl = new Position(hump.x + wormLength/4.0 * cos(bearing), hump.y + wormLength/4.0 * sin(bearing));
-    Position headControl = new Position(tail.x + 3.0*wormLength/4.0 * cos(bearing), tail.y + 3.0*wormLength/4.0 * sin(bearing));
-    Position head = new Position(tail.x + wormLength * cos(bearing), tail.y + wormLength * sin(bearing));
+    tailControl = new Position(tail.x + wormLength/4.0 * cos(bearing), tail.y + wormLength/4.0 * sin(bearing));
+    hump = new Position(hypot * cos(bearing-theta) + tail.x, hypot * sin(bearing-theta) + tail.y);
+    humpTailControl = new Position(hump.x - wormLength/4.0 * cos(bearing), hump.y - wormLength/4.0 * sin(bearing));
+    humpHeadControl = new Position(hump.x + wormLength/4.0 * cos(bearing), hump.y + wormLength/4.0 * sin(bearing));
+    headControl = new Position(tail.x + 3.0*wormLength/4.0 * cos(bearing), tail.y + 3.0*wormLength/4.0 * sin(bearing));
+    head = new Position(tail.x + wormLength * cos(bearing), tail.y + wormLength * sin(bearing));
 
-    float bearingNormal = bearing - HALF_PI;
-    float bearingReverse = bearing + PI;
-
-    Position tailControlShifted = intersect(translatePosition(tail, bearingNormal), 
-                                            translatePosition(tailControl, bearingNormal),
-                                            translatePosition(tailControl, bearingReverse),
-                                            translatePosition(humpTailControl, bearingReverse)
+    tailControlShifted = intersect(translatePosition(tail, bearingNormal, wormWidth), 
+                                            translatePosition(tailControl, bearingNormal, wormWidth),
+                                            translatePosition(tailControl, bearingReverse, wormWidth),
+                                            translatePosition(humpTailControl, bearingReverse, wormWidth)
                                             );
 
-    Position humpTailControlShifted = intersect(translatePosition(tailControl, bearingReverse),
-                                                translatePosition(humpTailControl, bearingReverse),
-                                                translatePosition(humpTailControl, bearingNormal),
-                                                translatePosition(hump, bearingNormal)
+    humpTailControlShifted = intersect(translatePosition(tailControl, bearingReverse, wormWidth),
+                                                translatePosition(humpTailControl, bearingReverse, wormWidth),
+                                                translatePosition(humpTailControl, bearingNormal, wormWidth),
+                                                translatePosition(hump, bearingNormal, wormWidth)
                                                 );
 
-    Position humpHeadControlShifted = intersect(translatePosition(hump, bearingNormal), 
-                                                translatePosition(humpHeadControl, bearingNormal),
-                                                translatePosition(humpHeadControl, bearing),
-                                                translatePosition(headControl, bearing)
+    humpHeadControlShifted = intersect(translatePosition(hump, bearingNormal, wormWidth), 
+                                                translatePosition(humpHeadControl, bearingNormal, wormWidth),
+                                                translatePosition(humpHeadControl, bearing, wormWidth),
+                                                translatePosition(headControl, bearing, wormWidth)
                                                 );
 
-    Position headControlShifted = intersect(translatePosition(humpHeadControl, bearing), 
-                                            translatePosition(headControl, bearing),
-                                            translatePosition(headControl, bearingNormal),
-                                            translatePosition(head, bearingNormal)
+    headControlShifted = intersect(translatePosition(humpHeadControl, bearing, wormWidth), 
+                                            translatePosition(headControl, bearing, wormWidth),
+                                            translatePosition(headControl, bearingNormal, wormWidth),
+                                            translatePosition(head, bearingNormal, wormWidth)
                                             );
 
-    Position headShifted = translatePosition(translatePosition(head, bearingNormal), bearing);
-    Position tailShifted = translatePosition(translatePosition(tail, bearingNormal), bearingReverse);
-    Position humpShifted = translatePosition(hump, bearingNormal);
+    headShifted = translatePosition(translatePosition(head, bearingNormal, wormWidth), bearing, wormWidth);
+    tailShifted = translatePosition(translatePosition(tail, bearingNormal, wormWidth), bearingReverse, wormWidth);
+    humpShifted = translatePosition(hump, bearingNormal, wormWidth);
     // Position headShifted = head;
     // Position tailShifted = tail;
     // Position humpShifted = hump;
+    
+    aestheticWormAdjustment(25.0*inched);
 
     strokeWeight(5);
     noFill();
     stroke(wormColor);
-    beginShape();
-    vertex(tail.x, tail.y);
-    bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
-    bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
-    endShape(); // use endShape(CLOSE) in the future
+    // beginShape();
+    // vertex(tail.x, tail.y);
+    // bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
+    // bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
+    // endShape(); // use endShape(CLOSE) in the future
 
-    float humpBloat = 25.0 * inched;
+    // float humpBloat = 25.0 * inched;
 
     beginShape();
     vertex(tailShifted.x, tailShifted.y);
-    bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y - humpBloat, humpShifted.x, humpShifted.y - humpBloat);
-    bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y - humpBloat, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
+    bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
+    bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
+
+
     endShape();
 
     // stroke(0, 0, 255);
@@ -318,7 +349,7 @@ class Inchworm {
 void setup () {
   size(MAX_W, MAX_H);
 
-  int wormCount = 1;//(int)random(5, 100);
+  int wormCount = 2;//(int)random(5, 100);
   println("wormCount: " + wormCount);
   for (int i = 0; i < wormCount; i++) {
     worms.add(new Inchworm());
