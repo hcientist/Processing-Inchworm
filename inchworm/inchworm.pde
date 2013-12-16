@@ -57,7 +57,7 @@ class Inchworm {
     wormLength = wormWidth*MAX_L_RATIO;//wormWidth * random(MIN_L_RATIO, MAX_L_RATIO);
 
     inched = random(1.0);
-    inchHeight = wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
+    inchHeight = wormLength * MAX_INCHY_RATIO;//wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
 
     speed = 0.009;//random(0.005, 0.2);
     di = speed;
@@ -72,6 +72,26 @@ class Inchworm {
 
   Inchworm() {
     setup();
+  }
+
+  String toString() {
+    return "tail: "+tail + "\n" +
+      "tailControl: "+tailControl + "\n" +
+      "humpTailControl: "+humpTailControl + "\n" +
+      "hump: "+hump + "\n" +
+      "humpHeadControl: "+humpHeadControl + "\n" +
+      "headControl: "+headControl + "\n" +
+      "head: "+head + "\n" +
+      "\n" +
+      "tailShifted: "+tailShifted + "\n" +
+      "tailControlShifted: "+tailControlShifted + "\n" +
+      "humpTailControlShifted: "+humpTailControlShifted + "\n" +
+      "humpShifted: "+humpShifted + "\n" +
+      "humpHeadControlShifted: "+humpHeadControlShifted + "\n" +
+      "headControlShifted: "+headControlShifted + "\n" +
+      "headShifted: "+headShifted + "\n" +
+      "\n";
+
   }
 
   float inchiness() {
@@ -138,14 +158,19 @@ class Inchworm {
     bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
     endShape(); // use endShape(CLOSE) in the future
 
+    float humpBloat = 25.0 * inched;
+
     beginShape();
     vertex(tailShifted.x, tailShifted.y);
-    bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
-    bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
+    bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y - humpBloat, humpShifted.x, humpShifted.y - humpBloat);
+    bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y - humpBloat, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
     endShape();
 
     // stroke(0, 0, 255);
-    // point(tailControlShifted.x, tailControlShifted.y);
+    // point(tailShifted.x, tailShifted.y);
+    // point(headShifted.x, headShifted.y);
+    // point(headControlShifted.x, headControlShifted.y);
+    // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
     // point(humpTailControlShifted.x, humpTailControlShifted.y);
     // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
     // point(headControlShifted.x, headControlShifted.y);
@@ -166,22 +191,6 @@ class Inchworm {
     if (inched >= 1.0) {
       di = -speed;
 
-      println("tail: "+tail);
-      println("tailControl: "+tailControl);
-      println("humpTailControl: "+humpTailControl);
-      println("hump: "+hump);
-      println("humpHeadControl: "+humpHeadControl);
-      println("headControl: "+headControl);
-      println("head: "+head);
-      println();
-      println("tailShifted: "+tailShifted);
-      println("tailControlShifted: "+tailControlShifted);
-      println("humpTailControlShifted: "+humpTailControlShifted);
-      println("humpShifted: "+humpShifted);
-      println("humpHeadControlShifted: "+humpHeadControlShifted);
-      println("headControlShifted: "+headControlShifted);
-      println("headShifted: "+headShifted);
-      println();
     }
     else if (inched <= 0.0) {
       di = speed;
