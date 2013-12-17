@@ -67,6 +67,8 @@ class Inchworm {
 
   Position frontFace;
   Position bottomFace;
+  Position frontFaceTail;
+  Position bottomFaceTail;
 
   void resetSpeed() {
     speed = originalSpeed;
@@ -202,6 +204,10 @@ class Inchworm {
     // Position headShifted = head;
     // Position tailShifted = tail;
     // Position humpShifted = hump;
+
+    frontFaceTail = translatePosition(tailShifted, bearingReverse, wormWidth/2.0);
+    bottomFaceTail = translatePosition(tail, bearingReverse, wormWidth * 2.0);
+
     
     aestheticWormAdjustment(this.wormWidth/3.0*inched);
 
@@ -222,6 +228,8 @@ class Inchworm {
     bezierVertex(bottomFace.x, bottomFace.y, frontFace.x, frontFace.y, headShifted.x, headShifted.y);
     bezierVertex(headControlShifted.x, headControlShifted.y, humpHeadControlShifted.x, humpHeadControlShifted.y, humpShifted.x, humpShifted.y);
     bezierVertex(humpTailControlShifted.x, humpTailControlShifted.y, tailControlShifted.x, tailControlShifted.y, tailShifted.x, tailShifted.y);
+
+    bezierVertex(frontFaceTail.x, frontFaceTail.y, bottomFaceTail.x, bottomFaceTail.y, tail.x, tail.y);
 
     endShape(CLOSE);
 
