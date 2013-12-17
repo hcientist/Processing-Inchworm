@@ -75,9 +75,9 @@ class Inchworm {
   }
 
   void setup() {
-    this.tail = new Position(random(MAX_W), random(MAX_H));
+    this.tail = new Position(random(MAX_W), 700);//random(MAX_H));
 
-    bearing = random(TAU);
+    bearing = 0;//random(TAU);
     wormColor = color(random(255), random(255), random(255));
     this.bearingNormal = bearing - HALF_PI;
     this.bearingReverse = bearing + PI;
@@ -154,9 +154,16 @@ class Inchworm {
     // humpShifted.y = humpShifted.y + humpBloat*sin(bearingNormal);
     // humpHeadControlShifted.x = humpHeadControlShifted.x + humpBloat*cos(bearingNormal);
     // humpHeadControlShifted.y = humpHeadControlShifted.y + humpBloat*sin(bearingNormal);
+
+    bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*5.0/4.0);
+    bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*5.0/4.0);
   }
 
   void step() {
+    strokeWeight(2);
+    stroke(0, 255, 0);
+    line(0, 700, MAX_W, 700);
+
 
     // strokeWeight(wormWidth);
     float theta = atan(inchiness()/(wormLength/2.0));
