@@ -187,8 +187,10 @@ class Inchworm {
     tailShifted = translatePosition(translatePosition(tail, bearingNormal, wormWidth), bearingReverse, wormWidth);
     humpShifted = translatePosition(hump, bearingNormal, wormWidth);
 
-    frontFace = translatePosition(headShifted, bearing+HALF_PI/2.0, wormWidth/2.0);
-    bottomFace = translatePosition(head, bearing, wormWidth/2.0);
+    frontFace = translatePosition(headShifted, bearing, wormWidth/2.0);
+    bottomFace = translatePosition(head, bearing, wormWidth);
+    // frontFace = translatePosition(headShifted, bearing+HALF_PI/2.0, wormWidth/2.0);
+    // bottomFace = translatePosition(head, bearing, wormWidth/2.0);
     // Position headShifted = head;
     // Position tailShifted = tail;
     // Position humpShifted = hump;
@@ -223,6 +225,10 @@ class Inchworm {
 
     point(frontFace.x, frontFace.y);
     point(bottomFace.x, bottomFace.y);
+
+    stroke(255,0,0);
+    point(head.x, head.y);
+    point(headShifted.x, headShifted.y);
 
     // stroke(255,0,0);
     // point(tailShifted.x, tailShifted.y);
