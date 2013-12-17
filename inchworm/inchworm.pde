@@ -422,7 +422,7 @@ void setup () {
 }
 
 boolean paused = false;
-
+boolean advanceFrame = false;
 
 
 void keyPressed() {
@@ -440,6 +440,8 @@ void keyPressed() {
     for (int i=0; i<worms.size(); i++) {
       worms.get(i).resetSpeed();
     }
+  } else if (keyCode == RIGHT) {
+    advanceFrame = true;
   }
 }
 
@@ -450,7 +452,8 @@ void draw() {
       worms.get(i).step();
     }
   } else {
-    if (keyPressed && keyCode == RIGHT) {
+    if (advanceFrame) {
+      advanceFrame = false;
       background(255);
       for (int i=0; i<worms.size(); i++) {
         worms.get(i).step();
