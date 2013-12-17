@@ -157,7 +157,7 @@ class Inchworm {
     // humpHeadControlShifted.x = humpHeadControlShifted.x + humpBloat*cos(bearingNormal);
     // humpHeadControlShifted.y = humpHeadControlShifted.y + humpBloat*sin(bearingNormal);
 
-    // For dynamic curve control... uncomment
+    // For dynamic curve control... might need to use some other function of inched besides humpBloat
     bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*1.0/4.0);
     bottomFace = translatePosition(bottomFace, bearing, humpBloat);
     bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*1.0/4.0);
