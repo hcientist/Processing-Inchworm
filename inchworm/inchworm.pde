@@ -140,10 +140,12 @@ class Inchworm {
     // println(bearingNormal);
     // println(humpTailControlShifted);
     humpTailControlShifted = translatePosition(humpTailControlShifted, bearingNormal, humpBloat);
+    humpTailControlShifted = translatePosition(humpTailControlShifted, bearing, humpBloat);
     // println(humpTailControlShifted);
     // println();
     humpShifted = translatePosition(humpShifted, bearingNormal, humpBloat);
     humpHeadControlShifted = translatePosition(humpHeadControlShifted, bearingNormal, humpBloat);
+    humpHeadControlShifted = translatePosition(humpHeadControlShifted, bearingReverse, humpBloat);
     // humpTailControlShifted.y = humpTailControlShifted.y + humpBloat*sin(bearingNormal);
     // humpTailControlShifted.x = humpTailControlShifted.x + humpBloat*cos(bearingNormal);
     // humpShifted.x = humpShifted.x + humpBloat*cos(bearingNormal);
@@ -194,7 +196,7 @@ class Inchworm {
     humpShifted = translatePosition(hump, bearingNormal, wormWidth);
 
     frontFace = translatePosition(headShifted, bearing, wormWidth/2.0);
-    bottomFace = translatePosition(head, bearing, wormWidth);
+    bottomFace = translatePosition(head, bearing, wormWidth * 2.0);
     // frontFace = translatePosition(headShifted, bearing+HALF_PI/2.0, wormWidth/2.0);
     // bottomFace = translatePosition(head, bearing, wormWidth/2.0);
     // Position headShifted = head;
@@ -217,7 +219,7 @@ class Inchworm {
     // bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
     // bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
 
-    bezierVertex(frontFace.x, frontFace.y, bottomFace.x, bottomFace.y, headShifted.x, headShifted.y);
+    bezierVertex(bottomFace.x, bottomFace.y, frontFace.x, frontFace.y, headShifted.x, headShifted.y);
     bezierVertex(headControlShifted.x, headControlShifted.y, humpHeadControlShifted.x, humpHeadControlShifted.y, humpShifted.x, humpShifted.y);
     bezierVertex(humpTailControlShifted.x, humpTailControlShifted.y, tailControlShifted.x, tailControlShifted.y, tailShifted.x, tailShifted.y);
 
