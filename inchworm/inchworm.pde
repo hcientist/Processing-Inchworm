@@ -41,6 +41,7 @@ class Inchworm {
   Position tail;
   color wormColor;          // color of this worm
   float speed;
+  float originalSpeed;
   float di;                 // delta inched, how much should the hump move "up or down"
 
   float MAX_WORM_WIDTH = 100;
@@ -67,6 +68,10 @@ class Inchworm {
   Position frontFace;
   Position bottomFace;
 
+  void resetSpeed() {
+    speed = originalSpeed;
+  }
+
   void setup() {
     this.tail = new Position(random(MAX_W), random(MAX_H));
 
@@ -84,6 +89,7 @@ class Inchworm {
     inchHeight = wormLength * random(MIN_INCHY_RATIO, MAX_INCHY_RATIO);
 
     speed = random(0.005, 0.2); // consider making this a normal or other (non-random) distribution
+    originalSpeed = speed;
     di = speed;
   }
 
@@ -370,6 +376,7 @@ class Inchworm {
 
 };
 
+
 void setup () {
   size(MAX_W, MAX_H);
 
@@ -381,9 +388,33 @@ void setup () {
   }
 }
 
+boolean paused = false;
+
+
+
+void keyPressed() {
+  if (key == ' ') {
+    paused = !paused;
+  } else if (key == '-') {
+    for (int i=0; i<worms.size(); i++) {
+      worms.get(i).speed *= 0.9;
+    }
+  } else if (key == '=') {
+    for (int i=0; i<worms.size(); i++) {
+      worms.get(i).speed *= 1.1;
+    }
+  } else if (key == '0') {
+    for (int i=0; i<worms.size(); i++) {
+      worms.get(i).resetSpeed();
+    }
+  }
+}
+
 void draw() {
-  background(255);
-  for (int i=0; i<worms.size(); i++) {
-    worms.get(i).step();
+  if (!paused) {
+    background(255);
+    for (int i=0; i<worms.size(); i++) {
+      worms.get(i).step();
+    }
   }
 }
