@@ -69,6 +69,8 @@ class Inchworm {
   Position bottomFace;
   Position frontFaceTail;
   Position bottomFaceTail;
+  Position headLowerExtension;
+  Position tailLowerExtension;
 
   void resetSpeed() {
     speed = originalSpeed;
@@ -155,8 +157,9 @@ class Inchworm {
     // humpHeadControlShifted.x = humpHeadControlShifted.x + humpBloat*cos(bearingNormal);
     // humpHeadControlShifted.y = humpHeadControlShifted.y + humpBloat*sin(bearingNormal);
 
-    bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*5.0/4.0);
-    bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*5.0/4.0);
+    // For dynamic curve control... uncomment
+    // bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*5.0/4.0);
+    // bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*5.0/4.0);
   }
 
   void step() {
@@ -215,7 +218,9 @@ class Inchworm {
     frontFaceTail = translatePosition(tailShifted, bearingReverse, wormWidth/2.0);
     bottomFaceTail = translatePosition(tail, bearingReverse, wormWidth * 2.0);
 
-    
+    headLowerExtension = translatePosition(head, bearing, wormWidth);
+    tailLowerExtension = translatePosition(tail, bearingReverse, wormWidth);
+
     aestheticWormAdjustment(this.wormWidth/3.0*inched);
 
     strokeWeight(5);
@@ -223,8 +228,12 @@ class Inchworm {
     stroke(wormColor);
     beginShape();
     vertex(tail.x, tail.y);
+
+    // Bottom curve
     bezierVertex(tailControl.x, tailControl.y, humpTailControl.x, humpTailControl.y, hump.x, hump.y);
     bezierVertex(humpHeadControl.x, humpHeadControl.y, headControl.x, headControl.y, head.x, head.y);
+    // End bottom curve
+
     // endShape(); // use endShape(CLOSE) in the future
 
     // beginShape();
@@ -232,11 +241,17 @@ class Inchworm {
     // bezierVertex(tailControlShifted.x, tailControlShifted.y, humpTailControlShifted.x, humpTailControlShifted.y, humpShifted.x, humpShifted.y);
     // bezierVertex(humpHeadControlShifted.x, humpHeadControlShifted.y, headControlShifted.x, headControlShifted.y, headShifted.x, headShifted.y);
 
+    // Circle back to top
+    vertex(headLowerExtension.x, headLowerExtension.y);
     bezierVertex(bottomFace.x, bottomFace.y, frontFace.x, frontFace.y, headShifted.x, headShifted.y);
+
+    // Top curve
     bezierVertex(headControlShifted.x, headControlShifted.y, humpHeadControlShifted.x, humpHeadControlShifted.y, humpShifted.x, humpShifted.y);
     bezierVertex(humpTailControlShifted.x, humpTailControlShifted.y, tailControlShifted.x, tailControlShifted.y, tailShifted.x, tailShifted.y);
 
-    bezierVertex(frontFaceTail.x, frontFaceTail.y, bottomFaceTail.x, bottomFaceTail.y, tail.x, tail.y);
+    // Circle back to first point
+    bezierVertex(frontFaceTail.x, frontFaceTail.y, bottomFaceTail.x, bottomFaceTail.y, tailLowerExtension.x, tailLowerExtension.y);
+    vertex(tail.x, tail.y);
 
     endShape(CLOSE);
 
@@ -252,6 +267,7 @@ class Inchworm {
     stroke(255,0,0);
     point(head.x, head.y);
     point(headShifted.x, headShifted.y);
+    point(headLowerExtension.x, headLowerExtension.y);
 
     // stroke(255,0,0);
     // point(tailShifted.x, tailShifted.y);
@@ -432,6 +448,13 @@ void draw() {
     background(255);
     for (int i=0; i<worms.size(); i++) {
       worms.get(i).step();
+    }
+  } else {
+    if (keyPressed && keyCode == RIGHT) {
+      background(255);
+      for (int i=0; i<worms.size(); i++) {
+        worms.get(i).step();
+      }
     }
   }
 }
