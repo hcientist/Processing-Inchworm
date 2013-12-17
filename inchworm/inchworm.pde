@@ -77,9 +77,9 @@ class Inchworm {
   }
 
   void setup() {
-    this.tail = new Position(random(MAX_W), 700);//random(MAX_H));
+    this.tail = new Position(random(MAX_W), random(MAX_H));
 
-    bearing = 0;//random(TAU);
+    bearing = random(TAU);
     wormColor = color(random(255), random(255), random(255));
     this.bearingNormal = bearing - HALF_PI;
     this.bearingReverse = bearing + PI;
@@ -158,14 +158,16 @@ class Inchworm {
     // humpHeadControlShifted.y = humpHeadControlShifted.y + humpBloat*sin(bearingNormal);
 
     // For dynamic curve control... uncomment
-    // bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*5.0/4.0);
-    // bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*5.0/4.0);
+    bottomFace = translatePosition(bottomFace, bearingNormalReverse, humpBloat*1.0/4.0);
+    bottomFace = translatePosition(bottomFace, bearing, humpBloat);
+    bottomFaceTail = translatePosition(bottomFaceTail, bearingNormalReverse, humpBloat*1.0/4.0);
+    bottomFaceTail = translatePosition(bottomFaceTail, bearingReverse, humpBloat);
   }
 
   void step() {
     strokeWeight(2);
     stroke(0, 255, 0);
-    line(0, 700, MAX_W, 700);
+    // line(0, 700, MAX_W, 700);
 
 
     // strokeWeight(wormWidth);
@@ -217,6 +219,8 @@ class Inchworm {
 
     frontFaceTail = translatePosition(tailShifted, bearingReverse, wormWidth/2.0);
     bottomFaceTail = translatePosition(tail, bearingReverse, wormWidth * 2.0);
+    // frontFaceTail = translatePosition(tailShifted, bearingReverse, wormWidth/2.0);
+    // bottomFaceTail = translatePosition(tail, bearingReverse, wormWidth * 2.0);
 
     headLowerExtension = translatePosition(head, bearing, wormWidth);
     tailLowerExtension = translatePosition(tail, bearingReverse, wormWidth);
@@ -251,35 +255,11 @@ class Inchworm {
 
     // Circle back to first point
     bezierVertex(frontFaceTail.x, frontFaceTail.y, bottomFaceTail.x, bottomFaceTail.y, tailLowerExtension.x, tailLowerExtension.y);
-    vertex(tail.x, tail.y);
+    // vertex(tail.x, tail.y);  
 
     endShape(CLOSE);
 
-    stroke(0, 0, 255);
-    // point(headControlShifted.x, headControlShifted.y);
-    // point(humpHeadControlShifted.x, humpHeadControlShifted.y);
-    // point(humpTailControlShifted.x, humpTailControlShifted.y);
-    // point(tailControlShifted.x, tailControlShifted.y);
-
-    point(frontFace.x, frontFace.y);
-    point(bottomFace.x, bottomFace.y);
-
-    stroke(255,0,0);
-    point(head.x, head.y);
-    point(headShifted.x, headShifted.y);
-    point(headLowerExtension.x, headLowerExtension.y);
-
-    // stroke(255,0,0);
-    // point(tailShifted.x, tailShifted.y);
-    // point(humpShifted.x, humpShifted.y);
-    // point(headShifted.x, headShifted.y);
-
-    // strokeWeight(2);
-    // line(translatePosition(tail, bearingNormal).x, translatePosition(tail, bearingNormal).y, translatePosition(tailControl, bearingNormal).x, translatePosition(tailControl, bearingNormal).y);
-    // line(translatePosition(tailControl, -bearing).x, 
-    //   translatePosition(tailControl, -bearing).y,
-    //   translatePosition(humpTailControl, -bearing).x,
-    //   translatePosition(humpTailControl, -bearing).y);
+    // debugPoints();
 
     // make the worm hump oscillate
     if (inched >= 1.0) {
@@ -312,6 +292,24 @@ class Inchworm {
         tail.y = 0 - (wormLength + wormWidth);
       }
     }
+  }
+
+  void debugPoints() {
+    stroke(0, 0, 255);
+    point(frontFace.x, frontFace.y);
+    point(bottomFace.x, bottomFace.y);
+
+    point(frontFaceTail.x, frontFaceTail.y);
+    point(bottomFaceTail.x, bottomFaceTail.y);
+
+    stroke(255,0,0);
+    point(head.x, head.y);
+    point(headShifted.x, headShifted.y);
+    point(headLowerExtension.x, headLowerExtension.y);
+
+    point(tail.x, tail.y);
+    point(tailShifted.x, tailShifted.y);
+    point(tailLowerExtension.x, tailLowerExtension.y);
   }
 
   // thanks to: http://processingjs.org/learning/custom/intersect/ for the intersection code!
@@ -413,8 +411,8 @@ class Inchworm {
 void setup () {
   size(MAX_W, MAX_H);
 
-  // int wormCount = (int)random(5, 100);
-  int wormCount = 1;
+  int wormCount = (int)random(5, 30);
+  // int wormCount = 1;
   println("wormCount: " + wormCount);
   for (int i = 0; i < wormCount; i++) {
     worms.add(new Inchworm());
